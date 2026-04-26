@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>Registro de Pedidos - Foodtruck</title>
+    <style>
+        /* Mantendo seu estilo original e adicionando os botões de pagamento */
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f4f4f4; }
+        .sidebar { height: 100vh; width: 240px; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #1a1a1a; padding-top: 20px; color: white; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
+        .sidebar h3 { text-align: center; color: #53c0f3; margin-bottom: 20px; }
+        .sidebar a { padding: 15px 20px; text-decoration: none; font-size: 16px; color: #ccc; display: block; transition: 0.3s; border-bottom: 1px solid #2a2a2a; }
+        .sidebar a:hover { background-color: #53c0f3; color: white; }
+        .main-content { margin-left: 260px; padding: 40px; min-height: 100vh; background-image: url('{{ url_for('static', filename='fundoshark.jpg') }}'); background-size: 500px; background-repeat: no-repeat; background-position: right bottom; background-attachment: fixed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        form { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        label { font-weight: bold; margin-right: 10px; }
+        select, input { padding: 8px; margin-right: 20px; border-radius: 4px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background-color: #218838; }
+        .btn-pay { background-color: #007bff; }
+        .btn-pay:hover { background-color: #0069d9; }
+        .btn-clear { background-color: #dc3545; }
+        .btn-clear:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>Shark Foodtruck</h3>
+        <hr style="border: 0.5px solid #333; margin: 10px 20px;">
+        <a href="{{ url_for('index') }}">📋 Registro de Pedidos</a>
+        <a href="/custos">💰 Custos e Lucros</a>
+        <a href="/relatorios">📊 Relatórios Financeiros</a>
+        <a href="/vendas">⏱️ Vendas em Tempo Real</a>
+        <a href="/estoque">📦 Estoque de Ingredientes</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Registro de Pedidos</h1>
+
+        <form method="POST">
+            <h3>Identificação (Opcional)</h3>
+            <input type="text" name="nome_cliente" placeholder="Nome" value="{{ cliente.nome if cliente.nome != 'Consumidor' else '' }}">
+            <input type="text" name="telefone_cliente" placeholder="Telefone" value="{{ cliente.telefone }}">
+            <button type="submit" style="background-color: #53c0f3;">Atualizar Cliente</button>
+        </form>
+
+        <form method="POST">
+            <label for="item">Item:</label>
+            <select name="item" id="item" required>
+                <option value="">Selecione</option>
+                {% for nome, preco in menu.items() %}
+                <option value="{{ nome }}">{{ nome }} - R$ {{ "%.2f" | format(preco) }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="quantidade">Qtd:</label>
+            <input type="number" id="quantidade" name="quantidade" min="1" value="1" required style="width: 60px;">
+
+            <button type="submit">Adicionar ao pedido</button>
+        </form>
+
+        {% if pedido %}
+            <h2>Itens para: {{ cliente.nome }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantidade</th>
+                        <th>Preço unitário</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pedido %}
+                        <tr>
+                            <td>{{ item.item }}</td>
+                            <td>{{ item.quantidade }}</td>
+                            <td>R$ {{ "%.2f" | format(item.preco) }}</td>
+                            <td>R$ {{ "%.2f" | format(item.quantidade * item.preco) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 20px; font-size: 1.5em;">
+                <strong>Total: R$ <span id="total_valor">{{ "%.2f" | format(total) }}</span></strong>
+            </div>
+
+            <div style="background: #fff; padding: 20px; border-radius: 8px; margin-top: 20px; border: 2px solid #53c0f3;">
+                <h3>Pagamento</h3>
+                <form action="/pagamento" method="POST" style="box-shadow: none; padding: 0;">
+                    <input type="hidden" name="total_pedido" value="{{ total }}">
+                    <input type="hidden" name="forma_pagamento" id="forma_input">
+                    
+                    <button type="button" class="btn-pay" onclick="selecionarPagamento('Débito')">💳 Débito</button>
+                    <button type="button" class="btn-pay" onclick="selecionarPagamento('Crédito')">💳 Crédito</button>
+                    <button type="button" class="btn-pay" onclick="selecionarPagamento('PIX')">📱 PIX</button>
+                    <button type="button" class="btn-pay" onclick="mostrarDinheiro()">💵 Dinheiro</button>
+
+                    <div id="secao-dinheiro" style="display:none; margin-top: 15px;">
+                        <label>Valor Recebido:</label>
+                        <input type="number" step="0.01" id="valor_recebido" name="valor_recebido" oninput="calcularTroco()">
+                        <p><strong>Troco: R$ <span id="display-troco">0.00</span></strong></p>
+                    </div>
+
+                    <hr>
+                    <button type="submit" style="width: 100%; font-size: 1.2em;">FINALIZAR PEDIDO</button>
+                </form>
+                <a href="{{ url_for('limpar_pedido') }}"><button class="btn-clear">Limpar Tudo</button></a>
+            </div>
+        {% else %}
+            <p style="margin-top: 20px;">Nenhum item adicionado ainda.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function selecionarPagamento(tipo) {
+            document.getElementById('forma_input').value = tipo;
+            document.getElementById('secao-dinheiro').style.display = 'none';
+            alert("Meio selecionado: " + tipo);
+        }
+
+        function mostrarDinheiro() {
+            document.getElementById('forma_input').value = 'Dinheiro';
+            document.getElementById('secao-dinheiro').style.display = 'block';
+        }
+
+        function calcularTroco() {
+            let total = {{ total }};
+            let recebido = document.getElementById('valor_recebido').value;
+            let troco = recebido - total;
+            document.getElementById('display-troco').innerText = troco > 0 ? troco.toFixed(2) : "0.00";
+        }
+    </script>
+</body>
+</html>
