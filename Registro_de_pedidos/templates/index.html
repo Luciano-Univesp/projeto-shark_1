@@ -26,6 +26,8 @@
         .status-preparo { border-left-color: #28a745; }
         .status-atrasado { border-left-color: #dc3545; animation: blink 1.5s infinite; }
         
+        h1 { color: #1a1a1a; border-bottom: 2px solid #53c0f3; padding-bottom: 10px; margin-top: 0; }
+
         .btn-entregar { display: block; text-align: center; background: #28a745; color: white; text-decoration: none; padding: 8px; border-radius: 4px; margin-top: 10px; font-size: 12px; font-weight: bold; }
         
         @keyframes blink { 50% { opacity: 0.6; } }
@@ -42,16 +44,16 @@
 <body>
 
     <div class="sidebar-left">
-        <h3>Shark Foodtruck</h3>
+        <h3>SHARK FOODTRUCK</h3>
         <hr style="margin: 10px 20px; border: 0.5px solid #333;">
         <a href="{{ url_for('index') }}">📋 Registro de Pedidos</a>
-        <a href="/custos">💰 Custos e Lucros</a>
-        <a href="/relatorios">📊 Relatórios Financeiros</a>
-        <a href="/estoque">📦 Estoque de Ingredientes</a>
+        <a href="{{ url_for('custos') }}">💰 Custos e Lucros</a>
+        <a href="{{ url_for('estoque') }}">📦 Estoque</a>
+        <a href="{{ url_for('relatorios') }}">📊 Relatórios</a>
     </div>
 
     <div class="main-content">
-        <h1>Registro de Pedidos</h1>
+        <h1>REGISTRO DE PEDIDOS</h1>
 
         <form method="POST">
             <h3>Identificação do Cliente</h3>

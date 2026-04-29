@@ -107,6 +107,19 @@ def marcar_entregue(id):
 def limpar_pedido():
     session.clear()
     return redirect(url_for("index"))
+@app.route('/custos')
+def custos():
+    # Aqui depois buscaremos o valor das 'Vendas Brutas' do banco de dados
+    vendas_brutas = 5000.00  # Exemplo temporário
+    return render_template('custos.html', vendas=vendas_brutas)
+@app.route('/estoque')
+def estoque():
+    return render_template('estoque.html')
+
+@app.route('/relatorios')
+def relatorios():
+    # Aqui passaremos os dados para os gráficos depois
+    return render_template('relatorios.html')
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

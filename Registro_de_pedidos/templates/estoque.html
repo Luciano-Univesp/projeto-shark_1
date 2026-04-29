@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque - Shark Foodtruck</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background-color: #f4f4f4; 
+            display: flex; 
+        }
+        
+        /* BARRA ESQUERDA PADRONIZADA */
+        .sidebar-left { 
+            height: 100vh; 
+            width: 220px; 
+            position: fixed; 
+            left: 0; 
+            top: 0; 
+            background-color: #1a1a1a; 
+            color: white; 
+            z-index: 100; 
+        }
+        
+        .sidebar-left h3 { 
+            text-align: center; 
+            color: #53c0f3; 
+            margin: 0; 
+            padding: 28px 0 10px 0; /* Ajustado para alinhar com o index */
+        }
+        
+        .sidebar-left hr { 
+            margin: 0 20px 15px 20px; 
+            border: 0; 
+            border-top: 2px solid #2a2a2a; 
+        }
+
+        /* ESTILO DOS LINKS QUE TINHA SUMIDO */
+        .sidebar-left a { 
+            padding: 15px 20px; 
+            text-decoration: none; 
+            font-size: 14px; 
+            color: #ccc; 
+            display: block; 
+            border-bottom: 1px solid #2a2a2a; 
+            transition: 0.3s;
+        }
+
+        .sidebar-left a:hover { background-color: #53c0f3; color: white; }
+
+        /* CONTEÚDO AJUSTADO */
+        .main-content {
+            margin-left: 220px; 
+            padding: 40px;
+            width: calc(100% - 220px); 
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+
+        h1 { color: #1a1a1a; border-bottom: 2px solid #53c0f3; padding-bottom: 10px; margin-top: 0; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #eee; padding: 15px; text-align: left; }
+        th { background-color: #f9f9f9; color: #333; }
+        
+        .btn-add {
+            background-color: #1a1a1a; color: #53c0f3; border: 2px solid #53c0f3;
+            padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 5px;
+            margin-bottom: 20px; transition: 0.3s;
+        }
+        .btn-add:hover { background-color: #53c0f3; color: white; }
+        
+        input[type="number"] { width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-left">
+        <h3>SHARK FOODTRUCK</h3>
+        <hr>
+        <a href="{{ url_for('index') }}">📋 Registro de Pedidos</a>
+        <a href="/custos">💰 Custos e Lucros</a>
+        <a href="/estoque">📦 Estoque</a>
+        <a href="/relatorios">📊 Relatórios</a>
+    </div>
+
+    <div class="main-content">
+        <h1>CONTROLE DE ESTOQUE</h1>
+
+        <button class="btn-add">+ ADICIONAR NOVO ITEM</button>
+
+        <div class="card">
+            <h3>📊 Conferência Semanal</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item do Inventário</th>
+                        <th>Estoque Inicial</th>
+                        <th>Estoque Final</th>
+                        <th>Consumo Real</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pão de Hambúrguer (Un)</td>
+                        <td><input type="number" placeholder="0"></td>
+                        <td><input type="number" placeholder="0"></td>
+                        <td><strong>--</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Carne Blend (Kg)</td>
+                        <td><input type="number" placeholder="0"></td>
+                        <td><input type="number" placeholder="0"></td>
+                        <td><strong>--</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 30px;">
+                <button style="background-color: #2ecc71; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    SALVAR ALTERAÇÕES
+                </button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
