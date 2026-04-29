@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>Shark Foodtruck - Sistema</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f4f4; display: flex; }
+        
+        /* BARRA ESQUERDA (Menu) */
+        .sidebar-left { height: 100vh; width: 220px; position: fixed; left: 0; top: 0; background-color: #1a1a1a; color: white; padding-top: 20px; z-index: 100; }
+        .sidebar-left h3 { text-align: center; color: #53c0f3; }
+        .sidebar-left a { padding: 15px 20px; text-decoration: none; font-size: 14px; color: #ccc; display: block; border-bottom: 1px solid #2a2a2a; }
+        .sidebar-left a:hover { background-color: #53c0f3; color: white; }
+
+        /* BARRA DIREITA (Status) */
+        .sidebar-right { height: 100vh; width: 260px; position: fixed; right: 0; top: 0; background-color: #fff; border-left: 2px solid #ddd; padding: 20px; overflow-y: auto; z-index: 100; }
+        .sidebar-right h3 { color: #333; border-bottom: 2px solid #53c0f3; padding-bottom: 10px; }
+
+        /* CONTEÚDO CENTRAL */
+        .main-content { margin-left: 240px; margin-right: 280px; padding: 40px; width: 100%; min-height: 100vh; 
+                        background-image: url('{{ url_for('static', filename='fundoshark.jpg') }}'); 
+                        background-size: 400px; background-repeat: no-repeat; background-position: center; background-attachment: fixed; }
+
+        /* CARDS DE STATUS */
+        .card-status { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-preparo { border-left-color: #28a745; }
+        .status-atrasado { border-left-color: #dc3545; animation: blink 1.5s infinite; }
+        
+        .btn-entregar { display: block; text-align: center; background: #28a745; color: white; text-decoration: none; padding: 8px; border-radius: 4px; margin-top: 10px; font-size: 12px; font-weight: bold; }
+        
+        @keyframes blink { 50% { opacity: 0.6; } }
+
+        /* TABELAS E FORMULÁRIOS */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #53c0f3; color: white; }
+        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-left">
+        <h3>Shark Foodtruck</h3>
+        <hr style="margin: 10px 20px; border: 0.5px solid #333;">
+        <a href="{{ url_for('index') }}">📋 Registro de Pedidos</a>
+        <a href="/custos">💰 Custos e Lucros</a>
+        <a href="/relatorios">📊 Relatórios Financeiros</a>
+        <a href="/estoque">📦 Estoque de Ingredientes</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Registro de Pedidos</h1>
+
+        <form method="POST">
+            <h3>Identificação do Cliente</h3>
+            <input type="text" name="nome_cliente" placeholder="Nome" value="{{ cliente.nome if cliente.nome != 'Consumidor' else '' }}">
+            <input type="text" name="telefone_cliente" placeholder="Telefone" value="{{ cliente.telefone }}">
+            <button type="submit" style="background-color: #53c0f3; color: white; padding: 10px;">Atualizar Cliente</button>
+        </form>
+
+        <form method="POST">
+            <label>Item:</label>
+            <select name="item" required>
+                <option value="">Selecione um item...</option>
+                {% for nome, preco in menu.items() %}
+                <option value="{{ nome }}">{{ nome }} - R$ {{ "%.2f" | format(preco) }}</option>
+                {% endfor %}
+            </select>
+            <label>Qtd:</label>
+            <input type="number" name="quantidade" min="1" value="1" style="width: 60px;">
+            <button type="submit" style="background-color: #28a745; color: white; padding: 10px;">Adicionar ao Pedido</button>
+        </form>
+
+        {% if pedido %}
+            <h2>Carrinho de {{ cliente.nome }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qtd</th>
+                        <th>Unitário</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pedido %}
+                    <tr>
+                        <td>{{ item.item }}</td>
+                        <td>{{ item.quantidade }}</td>
+                        <td>R$ {{ "%.2f" | format(item.preco) }}</td>
+                        <td>R$ {{ "%.2f" | format(item.quantidade * item.preco) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin: 20px 0; font-size: 1.8em; color: #1a1a1a;">
+                <strong>Total: R$ {{ "%.2f" | format(total) }}</strong>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 2px solid #53c0f3;">
+                <h3>Pagamento</h3>
+                <form action="/pagamento" method="POST" style="box-shadow: none; padding: 0;">
+                    <input type="hidden" name="total_pedido" value="{{ total }}">
+                    <input type="hidden" name="forma_pagamento" id="forma_input">
+                    
+                    <button type="button" onclick="selecionarPagamento('Débito')" style="background:#007bff; color:white; padding:10px;">💳 Débito</button>
+                    <button type="button" onclick="selecionarPagamento('Crédito')" style="background:#007bff; color:white; padding:10px;">💳 Crédito</button>
+                    <button type="button" onclick="selecionarPagamento('PIX')" style="background:#007bff; color:white; padding:10px;">📱 PIX</button>
+                    <button type="button" onclick="mostrarDinheiro()" style="background:#007bff; color:white; padding:10px;">💵 Dinheiro</button>
+
+                    <div id="secao-dinheiro" style="display:none; margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 5px;">
+                        <label>Valor Recebido:</label>
+                        <input type="number" step="0.01" id="valor_recebido" name="valor_recebido" oninput="calcularTroco()">
+                        <p><strong>Troco: R$ <span id="display-troco">0.00</span></strong></p>
+                    </div>
+
+                    <button type="submit" style="width: 100%; font-size: 1.2em; background: #28a745; color: white; margin-top: 15px; padding: 15px;">FINALIZAR PEDIDO</button>
+                </form>
+                <a href="{{ url_for('limpar_pedido') }}"><button style="background: #dc3545; color: white; margin-top: 10px; padding: 5px 10px;">Limpar Carrinho</button></a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="sidebar-right">
+        <h3>Status dos Pedidos</h3>
+        <p style="font-size: 0.8em; color: #666;">Acompanhamento em tempo real</p>
+        <hr>
+        {% for p in pedidos_vivos %}
+        <div class="card-status {{ p.classe }}">
+            <p style="margin: 0;"><strong>#{{ p.id }} - {{ p.cliente }}</strong></p>
+            <p style="margin: 5px 0; font-size: 0.9em;">{{ p.status }} ({{ p.minutos }} min)</p>
+            <a href="{{ url_for('marcar_entregue', id=p.id) }}" class="btn-entregar">ENTREGUE</a>
+        </div>
+        {% else %}
+        <p style="color: #999; text-align: center; margin-top: 20px;">Nenhum pedido pendente.</p>
+        {% endfor %}
+    </div>
+
+    <script>
+        function selecionarPagamento(tipo) {
+            document.getElementById('forma_input').value = tipo;
+            document.getElementById('secao-dinheiro').style.display = 'none';
+            alert("Meio selecionado: " + tipo);
+        }
+
+        function mostrarDinheiro() {
+            document.getElementById('forma_input').value = 'Dinheiro';
+            document.getElementById('secao-dinheiro').style.display = 'block';
+        }
+
+        function calcularTroco() {
+            let total = {{ total if total else 0 }};
+            let recebido = document.getElementById('valor_recebido').value;
+            let troco = recebido - total;
+            document.getElementById('display-troco').innerText = troco > 0 ? troco.toFixed(2) : "0.00";
+        }
+    </script>
+</body>
+</html>
