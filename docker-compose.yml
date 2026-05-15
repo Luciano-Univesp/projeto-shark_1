@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -11,23 +9,20 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d  # ESSA LINHA CRIA AS TABELAS
 
-volumes:
-  mysql_data:
- version: '3.8'
-
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: foodtruck-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: foodtruck
+  app:
+    build: .
+    container_name: shark-foodtruck-app
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
+      - "5000:5000"
+    environment:
+      - DB_HOST=foodtruck-mysql
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=foodtruck
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
-   

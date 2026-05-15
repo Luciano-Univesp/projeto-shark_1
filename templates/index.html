@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Shark Foodtruck - Sistema</title>
     <style>
+        /* ESTILIZAÇÃO GERAL */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f4f4; display: flex; }
         
         /* BARRA ESQUERDA (Menu) */
@@ -61,7 +62,7 @@
             <input type="text" name="telefone_cliente" placeholder="Telefone" value="{{ cliente.telefone }}">
             <button type="submit" style="background-color: #53c0f3; color: white; padding: 10px;">Atualizar Cliente</button>
         </form>
-
+        
         <form method="POST">
             <label>Item:</label>
             <select name="item" required>
@@ -130,6 +131,7 @@
         <h3>Status dos Pedidos</h3>
         <p style="font-size: 0.8em; color: #666;">Acompanhamento em tempo real</p>
         <hr>
+        
         {% for p in pedidos_vivos %}
         <div class="card-status {{ p.classe }}">
             <p style="margin: 0;"><strong>#{{ p.id }} - {{ p.cliente }}</strong></p>
@@ -142,6 +144,7 @@
     </div>
 
     <script>
+        // Funções de interface de pagamento
         function selecionarPagamento(tipo) {
             document.getElementById('forma_input').value = tipo;
             document.getElementById('secao-dinheiro').style.display = 'none';
@@ -159,6 +162,28 @@
             let troco = recebido - total;
             document.getElementById('display-troco').innerText = troco > 0 ? troco.toFixed(2) : "0.00";
         }
+
+        // Lógica para abertura automática da comanda (Ticket)
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ticketId = urlParams.get('ticket');
+            
+            if (ticketId) {
+                // Tenta abrir a rota de impressão em uma nova aba
+                const win = window.open('/imprimir_ticket/' + ticketId, '_blank');
+                
+                if (win) {
+                    win.focus();
+                } else {
+                    // Caso o navegador bloqueie pop-ups
+                    alert('O ticket foi gerado! Por favor, habilite os pop-ups do navegador para visualizá-lo automaticamente.');
+                }
+                
+                // Limpa o parâmetro 'ticket' da URL para não reabrir ao atualizar a página (F5)
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        })();
     </script>
+
 </body>
 </html>

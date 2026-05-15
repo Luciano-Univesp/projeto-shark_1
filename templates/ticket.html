@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; width: 280px; margin: 0; padding: 15px; background-color: white; }
+        .centralizado { text-align: center; }
+        .linha { border-bottom: 1px dashed #000; margin: 8px 0; }
+        table { width: 100%; font-size: 13px; border-collapse: collapse; }
+        .total { font-size: 16px; font-weight: bold; text-align: right; margin-top: 10px; }
+        .info { font-size: 14px; margin: 5px 0; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body onload="window.print();">
+    <div class="centralizado">
+        <h2 style="margin: 0;">SHARK FOODTRUCK</h2>
+        <p style="margin: 5px 0;">PEDIDO #{{ pedido.id_pedidos }}</p>
+    </div>
+    
+    <div class="linha"></div>
+    <p class="info"><strong>Cliente:</strong> {{ pedido.nome_cliente }}</p>
+    <p class="info"><strong>Data:</strong> {{ pedido.hora_pedido.strftime('%d/%m/%Y %H:%M') }}</p>
+    <div class="linha"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="text-align: left;">Item</th>
+                <th style="text-align: right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.quantidade }}x {{ item.nome }}</td>
+                <td style="text-align: right;">R$ {{ "%.2f"|format(item.quantidade * item.preco_unitario) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="linha"></div>
+    <div class="total">TOTAL: R$ {{ "%.2f"|format(pedido.total) }}</div>
+    
+    <div class="centralizado no-print" style="margin-top: 30px;">
+        <button onclick="window.print()" style="padding: 10px; cursor: pointer;">Imprimir</button>
+        <button onclick="window.close()" style="padding: 10px; cursor: pointer;">Fechar</button>
+    </div>
+</body>
+</html>

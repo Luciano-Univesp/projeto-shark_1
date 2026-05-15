@@ -26,8 +26,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `pedidos` (
   `id_pedidos` INT NOT NULL AUTO_INCREMENT,
-  `data_pedido` DATETIME NULL,
-  `valor_total` DECIMAL(10,2) NULL,
+  `nome_cliente` VARCHAR(100) NOT NULL,
+  `total` DECIMAL(10,2) NOT NULL,
+  `status` VARCHAR(20) NOT NULL,
+  `hora_pedido` DATETIME NOT NULL,
   PRIMARY KEY (`id_pedidos`))
 ENGINE = InnoDB;
 
@@ -40,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `itens_pedido` (
   `preco_unitario` DECIMAL(10,2) NOT NULL,
   `pedidos_id_pedidos` INT NOT NULL,
   `produtos_id_produtos` INT NOT NULL,
-  `itens_pedidocol` VARCHAR(45) NULL,
+
   PRIMARY KEY (`id_itens`),
   INDEX `fk_Itens_pedido_Pedidos_idx` (`pedidos_id_pedidos` ASC) VISIBLE,
   INDEX `fk_Itens_pedido_produtos1_idx` (`produtos_id_produtos` ASC) VISIBLE,
